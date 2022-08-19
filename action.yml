@@ -1,0 +1,18 @@
+name: 'Build Reporter'
+description: 'Report build information in workflow summary'
+inputs:
+  github-token:
+    description: 'GitHub token'
+    required: true
+  build-reports-artifacts-path:
+    description: 'GitHub token'
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - run: curl -Ls https://sh.jbang.dev | bash -s - app setup
+      shell: bash
+    - run: ~/.jbang/bin/jbang --verbose --repos 'https://s01.oss.sonatype.org/content/repositories/snapshots/' --repos 'mavencentral' io.quarkus.bot:action-build-reporter:999-SNAPSHOT
+      shell: bash
+      env:
+        JSON_INPUTS: ${{ toJSON(inputs) }}
