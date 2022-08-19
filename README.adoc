@@ -1,0 +1,53 @@
+= action-build-reporter
+
+A GitHub Action building a build report of a workflow run and publishing it in the job summary.
+
+This is the counterpart of the reports published by the https://github.com/quarkusio/quarkus-github-bot[Quarkus GitHub Bot] as pull request comments and is mostly useful for forks.
+
+This action is based on:
+
+- https://github.com/quarkiverse/quarkus-github-action[Quarkus GitHub Action]
+- https://github.com/quarkusio/build-reporter[Build reporter]
+
+== Setting up the action
+
+The action needs to have access to the currently generated artifacts.
+Artifacts are accessible to the GitHub REST API only after the workflow run is completed.
+Thus we use the GitHub `download-artifact` action which uses internal APIs to download the artifacts while the workflow run is still running.
+
+The action has to be run in a separate job that depends on all the other build jobs.
+
+For instance:
+
+[source,yaml]
+----
+jobs:
+  ... various other jobs ...
+
+  build-report:
+    runs-on: ubuntu-latest
+    name: Build report
+    needs: [build,jvm-green,jvm-initial,native-green,native-red]
+    if: always()
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          path: build-reports-artifacts
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Produce report and add it as job summary
+        uses: quarkusio/action-build-reporter@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          build-reports-artifacts-path: build-reports-artifacts
+          forks-only: true
+----
+
+You can omit `forks-only` if you want to publish the job summary even for the upstream repository.
+
+== Example
+
+> image::documentation/screenshots/build-report-summary.png[]
