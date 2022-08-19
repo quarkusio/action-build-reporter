@@ -1,6 +1,6 @@
 = action-build-reporter
 
-A GitHub Action building a build report of a workflow run and publishing it in the job summary.
+A GitHub Action producing a build report of a workflow run and publishing it in the job summary.
 
 This is the counterpart of the reports published by the https://github.com/quarkusio/quarkus-github-bot[Quarkus GitHub Bot] as pull request comments and is mostly useful for forks.
 
