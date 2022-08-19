@@ -17,6 +17,7 @@ import io.quarkiverse.githubaction.Action;
 import io.quarkiverse.githubaction.Commands;
 import io.quarkiverse.githubaction.Context;
 import io.quarkiverse.githubaction.Inputs;
+import io.quarkus.bot.action.buildreporter.workflow.QuarkusWorkflowConstants;
 import io.quarkus.bot.buildreporter.githubactions.BuildReporterActionHandler;
 import io.quarkus.bot.buildreporter.githubactions.BuildReporterConfig;
 
@@ -25,13 +26,22 @@ public class BuildReporterAction {
     private static final Logger LOG = Logger.getLogger(BuildReporterAction.class);
 
     private static final String BUILD_REPORTS_ARTIFACTS_PATH_INPUT_NAME = "build-reports-artifacts-path";
-    private static final String JOB_NAME_INITIAL_JDK_PREFIX = "Initial JDK ";
+    private static final String FORKS_ONLY_INPUT_NAME = "forks-only";
 
     @Inject
     BuildReporterActionHandler buildReporterActionHandler;
 
     @Action
     void postJobSummary(Inputs inputs, Commands commands, Context context, GitHub gitHub) throws IOException {
+        boolean forksOnly = inputs.getBoolean(FORKS_ONLY_INPUT_NAME).orElse(Boolean.FALSE);
+
+        GHWorkflowRun workflowRun = gitHub.getRepository(context.getGitHubRepository())
+                .getWorkflowRun(context.getGitHubRunId());
+
+        if (forksOnly && !workflowRun.getRepository().isFork()) {
+            return;
+        }
+
         Path buildReportsArtifactsPath = Path.of(inputs.getRequired(BUILD_REPORTS_ARTIFACTS_PATH_INPUT_NAME));
 
         if (!Files.exists(buildReportsArtifactsPath)) {
@@ -41,12 +51,9 @@ public class BuildReporterAction {
         }
 
         BuildReporterConfig buildReporterConfig = new BuildReporterConfig.Builder()
-                .createCheckRun(false)
+                .createCheckRun(true) // let's try this and we can set it to false if it doesn't work well enough
                 .workflowJobComparator(QuarkusWorkflowJobComparator.INSTANCE)
                 .build();
-
-        GHWorkflowRun workflowRun = gitHub.getRepository(context.getGitHubRepository())
-                .getWorkflowRun(context.getGitHubRunId());
 
         Optional<String> report = buildReporterActionHandler.generateReport(workflowRun, buildReportsArtifactsPath,
                 buildReporterConfig);
@@ -64,12 +71,12 @@ public class BuildReporterAction {
 
         @Override
         public int compare(GHWorkflowJob o1, GHWorkflowJob o2) {
-            if (o1.getName().startsWith(JOB_NAME_INITIAL_JDK_PREFIX)
-                    && !o2.getName().startsWith(JOB_NAME_INITIAL_JDK_PREFIX)) {
+            if (o1.getName().startsWith(QuarkusWorkflowConstants.JOB_NAME_INITIAL_JDK_PREFIX)
+                    && !o2.getName().startsWith(QuarkusWorkflowConstants.JOB_NAME_INITIAL_JDK_PREFIX)) {
                 return -1;
             }
-            if (!o1.getName().startsWith(JOB_NAME_INITIAL_JDK_PREFIX)
-                    && o2.getName().startsWith(JOB_NAME_INITIAL_JDK_PREFIX)) {
+            if (!o1.getName().startsWith(QuarkusWorkflowConstants.JOB_NAME_INITIAL_JDK_PREFIX)
+                    && o2.getName().startsWith(QuarkusWorkflowConstants.JOB_NAME_INITIAL_JDK_PREFIX)) {
                 return 1;
             }
 

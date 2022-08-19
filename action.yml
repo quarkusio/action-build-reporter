@@ -7,6 +7,9 @@ inputs:
   build-reports-artifacts-path:
     description: 'GitHub token'
     required: false
+  forks-only:
+    description: 'Whether the report should be added for forks only'
+    required: false
 runs:
   using: "composite"
   steps:
