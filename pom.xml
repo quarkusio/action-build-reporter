@@ -20,7 +20,7 @@
         <formatter-plugin.version>2.20.0</formatter-plugin.version>
 
         <quarkus-github-action.version>0.9.2</quarkus-github-action.version>
-        <build-reporter.version>2.2.0</build-reporter.version>
+        <build-reporter.version>2.2.1</build-reporter.version>
     </properties>
     <dependencyManagement>
         <dependencies>
