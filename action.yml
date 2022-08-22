@@ -5,7 +5,7 @@ inputs:
     description: 'GitHub token'
     required: true
   build-reports-artifacts-path:
-    description: 'GitHub token'
+    description: 'Path where to find build reports'
     required: false
   forks-only:
     description: 'Whether the report should be added for forks only'
