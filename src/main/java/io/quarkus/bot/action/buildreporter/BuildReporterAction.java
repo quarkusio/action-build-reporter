@@ -51,7 +51,8 @@ public class BuildReporterAction {
         }
 
         BuildReporterConfig buildReporterConfig = new BuildReporterConfig.Builder()
-                .createCheckRun(true) // let's try this and we can set it to false if it doesn't work well enough
+                // only create check run and annotation if this is a fork
+                .createCheckRun(workflowRun.getRepository().isFork())
                 .workflowJobComparator(QuarkusWorkflowJobComparator.INSTANCE)
                 .build();
 
