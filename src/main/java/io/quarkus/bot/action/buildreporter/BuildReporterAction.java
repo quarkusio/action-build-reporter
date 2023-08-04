@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jboss.logging.Logger;
 import org.kohsuke.github.GHWorkflowJob;
