@@ -63,7 +63,7 @@ public class BuildReporterAction {
             return;
         }
 
-        commands.jobSummary(report.get());
+        commands.appendJobSummary(report.get());
     }
 
     private final static class QuarkusWorkflowJobComparator implements Comparator<GHWorkflowJob> {
