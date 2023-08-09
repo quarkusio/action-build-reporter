@@ -15,7 +15,7 @@ runs:
   steps:
     - run: curl -Ls https://sh.jbang.dev | bash -s - app setup
       shell: bash
-    - run: ~/.jbang/bin/jbang --verbose --repos 'https://s01.oss.sonatype.org/content/repositories/snapshots/' --repos 'mavencentral' io.quarkus.bot:action-build-reporter:999-SNAPSHOT
+    - run: ~/.jbang/bin/jbang --repos 'https://s01.oss.sonatype.org/content/repositories/snapshots/' --repos 'mavencentral' io.quarkus.bot:action-build-reporter:999-SNAPSHOT
       shell: bash
       env:
         JSON_INPUTS: ${{ toJSON(inputs) }}
