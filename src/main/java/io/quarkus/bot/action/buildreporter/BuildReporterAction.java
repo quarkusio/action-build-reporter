@@ -56,8 +56,8 @@ public class BuildReporterAction {
                 .workflowJobComparator(QuarkusWorkflowJobComparator.INSTANCE)
                 .build();
 
-        Optional<String> report = buildReporterActionHandler.generateReport(workflowRun, buildReportsArtifactsPath,
-                buildReporterConfig);
+        Optional<String> report = buildReporterActionHandler.generateReport(context.getGitHubWorkflow(), workflowRun,
+                buildReportsArtifactsPath, buildReporterConfig);
 
         if (report.isEmpty()) {
             return;
