@@ -13,9 +13,31 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: curl -Ls https://sh.jbang.dev | bash -s - app setup
+    - name: Inject quarkus-github-action repository credentials
       shell: bash
-    - run: ~/.jbang/bin/jbang --fresh --repos 'https://s01.oss.sonatype.org/content/repositories/snapshots/' --repos 'mavencentral' io.quarkus.bot:action-build-reporter:999-SNAPSHOT
+      run: |
+        if [ -f ~/.m2/settings.xml ]; then
+          if ! grep -q '<id>quarkus-github-action</id>' ~/.m2/settings.xml; then
+            sed -i.bak 's@</servers>@<server><id>quarkus-github-action</id><username>${env.GITHUB_ACTOR}</username><password>${env.GITHUB_TOKEN}</password></server></servers>@' ~/.m2/settings.xml
+          fi
+        else
+          mkdir -p ~/.m2/
+          cat <<\EOF > ~/.m2/settings.xml
+        <?xml version="1.0"?>
+        <settings>
+          <servers>
+            <server>
+              <id>quarkus-github-action</id>
+              <username>${env.GITHUB_ACTOR}</username>
+              <password>${env.GITHUB_TOKEN}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+        fi
+    - name: Set up JBang
+      uses: jbangdev/setup-jbang@main
+    - run: ~/.jbang/bin/jbang --java 21 --fresh --repos 'quarkus-github-action=https://maven.pkg.github.com/quarkusio/action-build-reporter/' --repos 'mavencentral' io.quarkus.bot:action-build-reporter:999-SNAPSHOT
       shell: bash
       env:
         JSON_INPUTS: ${{ toJSON(inputs) }}

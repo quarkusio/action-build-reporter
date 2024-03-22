@@ -51,3 +51,7 @@ You can omit `forks-only` if you want to publish the job summary even for the up
 == Example
 
 > image::documentation/screenshots/build-report-summary.png[]
+
+== Release
+
+This action is automatically deployed to the Maven repository of this GitHub repository when `main` is pushed.
