@@ -11,7 +11,11 @@ This action is based on:
 
 == Setting up the action
 
-The action needs to have access to the currently generated artifacts.
+When you have multiple jobs started in the same workflow,
+you usually want to have only one report for all the jobs.
+
+The jobs may upload artifacts named `build-reports-<job name>` containing the build reports,
+an additional job depending on all these jobs will download the artifacts and analyze them.
 Artifacts are accessible to the GitHub REST API only after the workflow run is completed.
 Thus we use the GitHub `download-artifact` action which uses internal APIs to download the artifacts while the workflow run is still running.
 
@@ -30,14 +34,11 @@ jobs:
     needs: [build,jvm-green,jvm-initial,native-green,native-red]
     if: always()
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           path: build-reports-artifacts
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
+          pattern: build-reports-*
+          merge-multiple: true
       - name: Produce report and add it as job summary
         uses: quarkusio/action-build-reporter@main
         with:
