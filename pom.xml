@@ -19,7 +19,7 @@
         <surefire-plugin.version>3.4.0</surefire-plugin.version>
         <formatter-plugin.version>2.24.1</formatter-plugin.version>
 
-        <quarkus-github-action.version>2.3.1</quarkus-github-action.version>
+        <quarkus-github-action.version>2.4.0</quarkus-github-action.version>
         <build-reporter.version>3.9.5</build-reporter.version>
     </properties>
     <dependencyManagement>
