@@ -15,8 +15,11 @@ import org.kohsuke.github.GitHub;
 
 import io.quarkiverse.githubaction.Action;
 import io.quarkiverse.githubaction.Commands;
+import io.quarkiverse.githubaction.ConfigFile;
 import io.quarkiverse.githubaction.Context;
 import io.quarkiverse.githubaction.Inputs;
+import io.quarkus.bot.action.buildreporter.config.QuarkusGitHubBotConfigFile;
+import io.quarkus.bot.action.buildreporter.util.Strings;
 import io.quarkus.bot.buildreporter.githubactions.BuildReporterActionHandler;
 import io.quarkus.bot.buildreporter.githubactions.BuildReporterConfig;
 
@@ -32,7 +35,8 @@ public class BuildReporterAction {
     BuildReporterActionHandler buildReporterActionHandler;
 
     @Action
-    void postJobSummary(Inputs inputs, Commands commands, Context context, GitHub gitHub) throws IOException {
+    void postJobSummary(Inputs inputs, Commands commands, Context context, GitHub gitHub,
+            @ConfigFile("quarkus-github-bot.yml") QuarkusGitHubBotConfigFile quarkusBotConfigFile) throws IOException {
         boolean forksOnly = inputs.getBoolean(FORKS_ONLY_INPUT_NAME).orElse(Boolean.FALSE);
 
         GHWorkflowRun workflowRun = gitHub.getRepository(context.getGitHubRepository())
@@ -72,6 +76,13 @@ public class BuildReporterAction {
         Optional<String> develocityUrl = inputs.get(DEVELOCITY_URL_INPUT_NAME);
         if (develocityUrl.isPresent()) {
             buildReporterConfigBuilder.enableDevelocity(true).develocityUrl(develocityUrl.get());
+        } else if (quarkusBotConfigFile != null && quarkusBotConfigFile.develocity.enabled
+                && Strings.isNotBlank(quarkusBotConfigFile.develocity.url)) {
+            buildReporterConfigBuilder.enableDevelocity(true).develocityUrl(quarkusBotConfigFile.develocity.url);
+        }
+
+        if (quarkusBotConfigFile != null) {
+            buildReporterConfigBuilder.ignoredFlakyTests(quarkusBotConfigFile.workflowRunAnalysis.ignoredFlakyTests);
         }
 
         BuildReporterConfig buildReporterConfig = buildReporterConfigBuilder.build();
