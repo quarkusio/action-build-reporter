@@ -26,6 +26,7 @@ public class BuildReporterAction {
 
     private static final String BUILD_REPORTS_ARTIFACTS_PATH_INPUT_NAME = "build-reports-artifacts-path";
     private static final String FORKS_ONLY_INPUT_NAME = "forks-only";
+    private static final String DEVELOCITY_URL_INPUT_NAME = "develocity-url";
 
     @Inject
     BuildReporterActionHandler buildReporterActionHandler;
@@ -63,11 +64,17 @@ public class BuildReporterAction {
                 workflowJobComparator = null;
         }
 
-        BuildReporterConfig buildReporterConfig = new BuildReporterConfig.Builder()
+        BuildReporterConfig.Builder buildReporterConfigBuilder = new BuildReporterConfig.Builder()
                 // only create check run and annotation if this is a fork
                 .createCheckRun(workflowRun.getRepository().isFork())
-                .workflowJobComparator(workflowJobComparator)
-                .build();
+                .workflowJobComparator(workflowJobComparator);
+
+        Optional<String> develocityUrl = inputs.get(DEVELOCITY_URL_INPUT_NAME);
+        if (develocityUrl.isPresent()) {
+            buildReporterConfigBuilder.enableDevelocity(true).develocityUrl(develocityUrl.get());
+        }
+
+        BuildReporterConfig buildReporterConfig = buildReporterConfigBuilder.build();
 
         Optional<String> report = buildReporterActionHandler.generateReport(context.getGitHubWorkflow(), workflowRun,
                 buildReportsArtifactsPath, buildReporterConfig);
