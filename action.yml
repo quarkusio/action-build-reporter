@@ -10,6 +10,9 @@ inputs:
   forks-only:
     description: 'Whether the report should be added for forks only'
     required: false
+  develocity-url:
+    description: 'The URL of the Develocity instance'
+    required: false
 runs:
   using: "composite"
   steps:
