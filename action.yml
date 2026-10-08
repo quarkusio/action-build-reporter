@@ -21,26 +21,26 @@ runs:
       run: |
         if [ -f ~/.m2/settings.xml ]; then
           if ! grep -q '<id>quarkus-github-action</id>' ~/.m2/settings.xml; then
-            sed -i.bak 's@</servers>@<server><id>quarkus-github-action</id><username>${env.GITHUB_ACTOR}</username><password>${env.GITHUB_TOKEN}</password></server></servers>@' ~/.m2/settings.xml
+            yq -p xml -o xml -i '.settings.servers.server |= (. | [.] + [{"id": "quarkus-github-action", "username": "${env.GITHUB_ACTOR}", "password": "${env.GITHUB_TOKEN}"}])' ~/.m2/settings.xml
           fi
         else
           mkdir -p ~/.m2/
-          cat <<\EOF > ~/.m2/settings.xml
-        <?xml version="1.0"?>
-        <settings>
-          <servers>
-            <server>
-              <id>quarkus-github-action</id>
-              <username>${env.GITHUB_ACTOR}</username>
-              <password>${env.GITHUB_TOKEN}</password>
-            </server>
-          </servers>
-        </settings>
-        EOF
+          yq -p xml -o xml -n '.settings.servers.server = {"id": "quarkus-github-action", "username": "${env.GITHUB_ACTOR}", "password": "${env.GITHUB_TOKEN}"}' > ~/.m2/settings.xml
         fi
+    - name: Set up Java 25
+      uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      with:
+        distribution: temurin
+        java-version: '25'
+        set-default: false
     - name: Set up JBang
       uses: jbangdev/setup-jbang@main
-    - run: ~/.jbang/bin/jbang --java 21 --fresh --repos 'quarkus-github-action=https://maven.pkg.github.com/quarkusio/action-build-reporter/' --repos 'mavencentral' io.quarkus.bot:action-build-reporter:999-SNAPSHOT
+    - run: |
+        if [[ -n "${JAVA_HOME_25_X64}" ]]; then
+          echo "Installing ${JAVA_HOME_25_X64} as JDK 25 for JBang"
+          jbang --verbose jdk install java-25 ${JAVA_HOME_25_X64}
+        fi
+        jbang --java 25 --fresh --repos 'quarkus-github-action=https://maven.pkg.github.com/quarkusio/action-build-reporter/' --repos 'mavencentral' io.quarkus.bot:action-build-reporter:999-SNAPSHOT
       shell: bash
       env:
         JSON_INPUTS: ${{ toJSON(inputs) }}
